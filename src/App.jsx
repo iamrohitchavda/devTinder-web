@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import Body from "./components/Body";
+import ProtectedLayout from "./components/ProtectedLayout";
+import PublicLayout from "./components/PublicLayout";
 import Login from "./features/auth/Login";
 import Profile from "./features/profile/Profile";
 import Feed from "./features/feed/Feed";
@@ -17,14 +18,17 @@ function App() {
       <Provider store={appStore}>
         <BrowserRouter basename="/">
           <Routes>
-            <Route path="/" element={<Body />}>
-              <Route path="/" element={<Feed />} />
+            <Route element={<PublicLayout />}>
               <Route path="/login" element={<Login />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/connections" element={<Connections />} />
-              <Route path="/requests" element={<Requests />} />
-              <Route path="/premium" element={<Premium />} />
-              <Route path="/chat/:toUserId" element={<Chat />} />
+            </Route>
+
+            <Route path="/" element={<ProtectedLayout />}>
+              <Route index element={<Feed />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="connections" element={<Connections />} />
+              <Route path="requests" element={<Requests />} />
+              <Route path="premium" element={<Premium />} />
+              <Route path="chat/:toUserId" element={<Chat />} />
             </Route>
             <Route path="*" element={<Error404 />} />
           </Routes>

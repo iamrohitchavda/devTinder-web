@@ -11,7 +11,7 @@ import Loader from "./Loader";
 
 import { createSocketConnection } from "../utils/socket";
 
-const Body = () => {
+const ProtectedLayout = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { data: userData, loading } = useSelector((store) => store.user);
@@ -67,4 +67,4 @@ const Body = () => {
   );
 };
 
-export default Body;
+export default ProtectedLayout;
