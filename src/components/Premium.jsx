@@ -25,9 +25,11 @@ const Premium = () => {
           <h2 className="text-4xl font-extrabold text-base-content sm:text-5xl tracking-tight">
             Elevate Your Experience
           </h2>
+          <span className="badge badge-outline badge-warning mt-4 font-semibold">
+            Premium plans coming soon
+          </span>
           <p className="mt-4 text-xl text-base-content/70 max-w-2xl mx-auto">
-            Choose the perfect membership to accelerate your networking and find
-            the best developer matches efficiently.
+            Preview the planned membership benefits. Payments are not available yet.
           </p>
         </div>
 
@@ -135,8 +137,8 @@ const Premium = () => {
                 </li>
               </ul>
               <div className="card-actions justify-center mt-auto pt-6">
-                <button className="btn w-full rounded-full border-none bg-linear-to-r from-yellow-400 to-orange-500 text-white shadow-md hover:shadow-lg hover:from-yellow-500 hover:to-orange-600 transition-all scale-105">
-                  Upgrade to Gold
+                <button disabled className="btn w-full rounded-full border-none bg-linear-to-r from-yellow-400 to-orange-500 text-white shadow-md opacity-60">
+                  Coming Soon
                 </button>
               </div>
             </div>
@@ -185,8 +187,8 @@ const Premium = () => {
                 </li>
               </ul>
               <div className="card-actions justify-center mt-auto pt-6">
-                <button className="btn btn-outline hover:bg-purple-600 hover:text-white hover:border-purple-600 w-full rounded-full transition-colors">
-                  Go Platinum
+                <button disabled className="btn btn-outline w-full rounded-full opacity-60">
+                  Coming Soon
                 </button>
               </div>
             </div>

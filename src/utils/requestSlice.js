@@ -4,7 +4,7 @@ const requestSlice = createSlice({
   name: "request",
   initialState: {
     data: [],
-    loading: false,
+    loading: true,
     error: null
   },
   reducers: {
@@ -21,6 +21,11 @@ const requestSlice = createSlice({
         (request) => request._id !== action.payload
       );
     },
+    clearRequests: (state) => {
+      state.data = [];
+      state.loading = false;
+      state.error = null;
+    },
     setRequests: (state, action) => {
       state.data = action.payload;
     },
@@ -31,6 +36,6 @@ const requestSlice = createSlice({
   }
 });
 
-export const { setRequests, addRequests, removeRequest, setLoading, setError } =
+export const { clearRequests, setRequests, addRequests, removeRequest, setLoading, setError } =
   requestSlice.actions;
 export default requestSlice.reducer;

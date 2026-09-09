@@ -6,7 +6,7 @@ import { useDispatch } from "react-redux";
 import { removeUser } from "../utils/userSlice";
 import { removeFeed } from "../utils/feedSlice";
 import { removeConnections } from "../utils/connectionSlice";
-import { removeRequest } from "../utils/requestSlice";
+import { clearRequests } from "../utils/requestSlice";
 import { hideToast } from "../utils/toastSlice";
 import { createSocketConnection } from "../utils/socket";
 
@@ -27,7 +27,7 @@ export const Navbar = () => {
       dispatch(removeUser());
       dispatch(removeFeed());
       dispatch(removeConnections());
-      dispatch(removeRequest());
+      dispatch(clearRequests());
       dispatch(hideToast());
       navigate("/login");
     }

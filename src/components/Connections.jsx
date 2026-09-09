@@ -2,35 +2,35 @@ import { useEffect } from "react";
 import { API_BASE_URL } from "../utils/constants";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import { addConnections, setLoading } from "../utils/connectionSlice";
+import { addConnections, setError, setLoading } from "../utils/connectionSlice";
 import { Link } from "react-router-dom";
 import Loader from "./Loader";
 
 const Connections = () => {
   const dispatch = useDispatch();
-  const { data: connections, loading } = useSelector(
+  const { data: connections, loading, error } = useSelector(
     (state) => state.connection,
   );
 
-  const fetchConnections = async () => {
-    if (connections && connections.length > 0) {
-      dispatch(setLoading(false));
-      return;
-    }
-    try {
-      const res = await axios.get(API_BASE_URL + "/user/connections", {
-        withCredentials: true,
-      });
-      dispatch(addConnections(res.data.data));
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   useEffect(() => {
+    const fetchConnections = async () => {
+      if (connections.length > 0) {
+        dispatch(setLoading(false));
+        return;
+      }
+
+      try {
+        const res = await axios.get(API_BASE_URL + "/user/connections", {
+          withCredentials: true,
+        });
+        dispatch(addConnections(res.data.data));
+      } catch (error) {
+        dispatch(setError(error.response?.data?.message || "Unable to load connections"));
+      }
+    };
+
     fetchConnections();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [connections.length, dispatch]);
 
   if (loading) {
     return (
@@ -42,6 +42,10 @@ const Connections = () => {
 
   if (!connections) {
     return null;
+  }
+
+  if (error) {
+    return <p className="text-center text-error my-10">{error}</p>;
   }
 
   if (connections.length === 0) {

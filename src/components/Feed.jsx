@@ -1,5 +1,5 @@
 import axios from "axios";
-import { addFeed, setLoading } from "../utils/feedSlice";
+import { addFeed, setError, setLoading } from "../utils/feedSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { API_BASE_URL } from "../utils/constants";
@@ -7,27 +7,28 @@ import UserCard from "./UserCard";
 import Loader from "./Loader";
 
 const Feed = () => {
-  const { data: feed, loading } = useSelector((state) => state.feed);
+  const { data: feed, loading, error } = useSelector((state) => state.feed);
   const dispatch = useDispatch();
 
-  const getFeed = async () => {
-    if (feed.length > 0) {
-      dispatch(setLoading(false));
-      return;
-    }
-    try {
-      const response = await axios.get(API_BASE_URL + "/feed", {
-        withCredentials: true
-      });
-
-      dispatch(addFeed(response.data.data));
-    } catch (error) {
-      console.error("Error fetching feed:", error);
-    }
-  };
   useEffect(() => {
+    const getFeed = async () => {
+      if (feed.length > 0) {
+        dispatch(setLoading(false));
+        return;
+      }
+
+      try {
+        const response = await axios.get(API_BASE_URL + "/feed", {
+          withCredentials: true,
+        });
+        dispatch(addFeed(response.data.data));
+      } catch (error) {
+        dispatch(setError(error.response?.data?.message || "Unable to load the feed"));
+      }
+    };
+
     getFeed();
-  }, []);
+  }, [dispatch, feed.length]);
 
   if (loading) {
     return (
@@ -35,6 +36,10 @@ const Feed = () => {
         <Loader />
       </div>
     );
+  }
+
+  if (error) {
+    return <p className="text-center text-error my-10">{error}</p>;
   }
 
   return (

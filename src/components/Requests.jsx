@@ -1,28 +1,34 @@
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { API_BASE_URL } from "../utils/constants";
-import { addRequests, removeRequest, setLoading } from "../utils/requestSlice";
+import { addRequests, removeRequest, setError, setLoading } from "../utils/requestSlice";
 import { useEffect } from "react";
 import { showToast } from "../utils/toastSlice";
 
 const Requests = () => {
-  const { data: request, loading } = useSelector((state) => state.request);
+  const { data: request, loading, error } = useSelector((state) => state.request);
   const dispatch = useDispatch();
-  const fetchRequests = async (from) => {
-    if (request.length > 0 && from !== "handleRequest") {
-      dispatch(setLoading(false));
-      return;
-    }
-
-    const res = await axios.get(API_BASE_URL + "/user/requests/received", {
-      withCredentials: true
-    });
-    dispatch(addRequests(res.data.data));
-  };
 
   useEffect(() => {
+    const fetchRequests = async () => {
+      if (request.length > 0) {
+        dispatch(setLoading(false));
+        return;
+      }
+
+      dispatch(setLoading(true));
+      try {
+        const res = await axios.get(API_BASE_URL + "/user/requests/received", {
+          withCredentials: true,
+        });
+        dispatch(addRequests(res.data.data));
+      } catch (error) {
+        dispatch(setError(error.response?.data?.message || "Unable to load requests"));
+      }
+    };
+
     fetchRequests();
-  }, []);
+  }, [dispatch, request.length]);
 
   if (loading) {
     return (
@@ -34,6 +40,10 @@ const Requests = () => {
 
   if (!request) {
     return null;
+  }
+
+  if (error) {
+    return <p className="text-center text-error my-10">{error}</p>;
   }
 
   if (request.length === 0) {
@@ -63,7 +73,12 @@ const Requests = () => {
         })
       );
     } catch (error) {
-      console.error("Error handling request:", error);
+      dispatch(
+        showToast({
+          message: error.response?.data?.message || "Unable to update request",
+          type: "error",
+        }),
+      );
     }
   };
 

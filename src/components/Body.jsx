@@ -16,27 +16,27 @@ const Body = () => {
   const navigate = useNavigate();
   const { data: userData, loading } = useSelector((store) => store.user);
 
-  const fetchUser = async () => {
-    if (userData) {
-      dispatch(setLoading(false));
-      return;
-    }
-
-    try {
-      const res = await axios.get(API_BASE_URL + "/profile/view", {
-        withCredentials: true,
-      });
-      dispatch(addUser(res.data.data));
-    } catch (error) {
-      dispatch(setError(error.message));
-      if (error.response && error.response.status === 401) navigate("/login");
-      console.error("Error fetching user data:", error);
-    }
-  };
-
   useEffect(() => {
+    const fetchUser = async () => {
+      if (userData) {
+        dispatch(setLoading(false));
+        return;
+      }
+
+      try {
+        const res = await axios.get(API_BASE_URL + "/profile/view", {
+          withCredentials: true,
+        });
+        dispatch(addUser(res.data.data));
+      } catch (error) {
+        const message = error.response?.data?.message || "Unable to load your session";
+        dispatch(setError(message));
+        if (error.response?.status === 401) navigate("/login");
+      }
+    };
+
     fetchUser();
-  }, []);
+  }, [dispatch, navigate, userData]);
 
   // Globally track online status when user is logged in
   useEffect(() => {
