@@ -10,11 +10,14 @@ import Toast from "./Toast";
 import Loader from "./Loader";
 
 import { createSocketConnection } from "../utils/socket";
+import MatchCelebration from "./MatchCelebration";
+import { hideMatch, showMatch } from "../utils/matchSlice";
 
 const ProtectedLayout = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { data: userData, loading } = useSelector((store) => store.user);
+  const match = useSelector((store) => store.match.data);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -47,6 +50,16 @@ const ProtectedLayout = () => {
     }
   }, [userData]);
 
+  useEffect(() => {
+    if (!userData) return;
+
+    const socket = createSocketConnection();
+    const handleMatchCreated = (matchData) => dispatch(showMatch(matchData));
+    socket.on("match-created", handleMatchCreated);
+
+    return () => socket.off("match-created", handleMatchCreated);
+  }, [dispatch, userData]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -63,6 +76,7 @@ const ProtectedLayout = () => {
       </main>
       <Footer />
       <Toast />
+      <MatchCelebration match={match} onClose={() => dispatch(hideMatch())} />
     </div>
   );
 };

@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { removeFeed } from "../utils/feedSlice";
 import { API_BASE_URL } from "../utils/constants";
 import { useState } from "react";
+import { showMatch } from "../utils/matchSlice";
 
 const UserCard = ({ user, compact = false, showActions = true }) => {
   const { _id, firstName, lastName, photoUrl, age, gender, bio } = user || {};
@@ -21,11 +22,14 @@ const UserCard = ({ user, compact = false, showActions = true }) => {
     // wait for animation to complete before removing from feed
     setTimeout(async () => {
       try {
-        await axios.post(
-          API_BASE_URL + `/request/send/${status}/${userId}`,
+        const response = await axios.post(
+          API_BASE_URL + `/swipes/${status}/${userId}`,
           {},
           { withCredentials: true },
         );
+        if (response.data.data?.isMatch) {
+          dispatch(showMatch(response.data.data));
+        }
         dispatch(removeFeed(userId));
         // Reset animation for the next card that renders
         setAnimationClass("animate-slide-up");

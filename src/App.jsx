@@ -8,7 +8,6 @@ import { Provider } from "react-redux";
 import appStore from "./utils/appStore";
 import Error404 from "./components/Error404";
 import Connections from "./features/connections/Connections";
-import Requests from "./features/connections/Requests";
 import Premium from "./features/premium/Premium";
 import Chat from "./features/chat/Chat";
 
@@ -26,7 +25,6 @@ function App() {
               <Route index element={<Feed />} />
               <Route path="profile" element={<Profile />} />
               <Route path="connections" element={<Connections />} />
-              <Route path="requests" element={<Requests />} />
               <Route path="premium" element={<Premium />} />
               <Route path="chat/:toUserId" element={<Chat />} />
             </Route>

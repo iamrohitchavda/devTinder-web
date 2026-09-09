@@ -6,7 +6,6 @@ import { useDispatch } from "react-redux";
 import { removeUser } from "../utils/userSlice";
 import { removeFeed } from "../utils/feedSlice";
 import { removeConnections } from "../utils/connectionSlice";
-import { clearRequests } from "../utils/requestSlice";
 import { hideToast } from "../utils/toastSlice";
 import { createSocketConnection } from "../utils/socket";
 
@@ -27,7 +26,6 @@ export const Navbar = () => {
       dispatch(removeUser());
       dispatch(removeFeed());
       dispatch(removeConnections());
-      dispatch(clearRequests());
       dispatch(hideToast());
       navigate("/login");
     }
@@ -90,14 +88,6 @@ export const Navbar = () => {
                   className="hover:bg-base-200 rounded-lg py-2 transition-colors"
                 >
                   Connections
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/requests"
-                  className="hover:bg-base-200 rounded-lg py-2 transition-colors"
-                >
-                  Requests
                 </Link>
               </li>
               <li>
