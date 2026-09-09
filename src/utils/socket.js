@@ -6,9 +6,9 @@ let socketInstance = null;
 export const createSocketConnection = () => {
   if (!socketInstance) {
     if (location.hostname === "localhost") {
-      socketInstance = io(API_BASE_URL);
+      socketInstance = io(API_BASE_URL, { withCredentials: true });
     } else {
-      socketInstance = io("/", { path: "/api/socket.io" });
+      socketInstance = io("/", { path: "/api/socket.io", withCredentials: true });
     }
   } else {
     // If the socket was previously disconnected (e.g. after a manual logout),

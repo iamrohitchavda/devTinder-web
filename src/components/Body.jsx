@@ -42,7 +42,7 @@ const Body = () => {
   useEffect(() => {
     if (userData) {
       const socket = createSocketConnection();
-      socket.emit("goOnline", { userId: userData._id });
+      socket.emit("goOnline");
     }
   }, [userData]);
 

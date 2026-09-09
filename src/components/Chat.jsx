@@ -62,7 +62,7 @@ const Chat = () => {
     const socket = createSocketConnection();
     // As soon as the page loads, the socket connection is made, and joinChat event is emitted
 
-    socket.emit("joinChat", { senderId: fromUserId, receiverId: toUserId });
+    socket.emit("joinChat", { receiverId: toUserId });
 
     socket.on(
       "messageReceived",
@@ -83,12 +83,15 @@ const Chat = () => {
       }
     });
 
+    socket.on("chat-error", ({ message }) => setError(message));
+
     // When the component unmounts or user navigates away, cleanly remove the listeners
     // instead of destroying the entire physical TCP connection.
     return () => {
       console.log("leaving chat component. cleaning listeners...");
       socket.off("messageReceived");
       socket.off("status-changed");
+      socket.off("chat-error");
     };
   }, [fromUserId, toUserId]);
 
@@ -107,13 +110,11 @@ const Chat = () => {
 
     socket.emit("sendMessage", {
       text: newMessage,
-      senderId: fromUserId,
       time: new Date().toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
       }),
       receiverId: toUserId,
-      senderName: user?.data?.firstName + " " + user?.data?.lastName,
     });
 
     setNewMessage("");
