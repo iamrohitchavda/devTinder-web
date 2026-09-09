@@ -20,7 +20,7 @@ const Feed = () => {
         withCredentials: true
       });
 
-      dispatch(addFeed(response.data.user));
+      dispatch(addFeed(response.data.data));
     } catch (error) {
       console.error("Error fetching feed:", error);
     }

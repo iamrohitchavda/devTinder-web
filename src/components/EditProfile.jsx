@@ -55,7 +55,7 @@ const EditProfile = ({ user }) => {
         },
         { withCredentials: true }
       );
-      dispatch(addUser(res.data));
+      dispatch(addUser(res.data.data));
 
       dispatch(
         showToast({

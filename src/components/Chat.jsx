@@ -40,8 +40,8 @@ const Chat = () => {
           setError("Something went wrong. Please try again later.");
         }
       }
-      if (chat?.data?.chat?.messages) {
-        const chatMessages = chat.data.chat.messages.map((msg) => {
+      if (chat?.data?.data?.messages) {
+        const chatMessages = chat.data.data.messages.map((msg) => {
           return {
             senderId: msg.senderId?._id || msg.senderId,
             senderName: msg.senderId?.firstName

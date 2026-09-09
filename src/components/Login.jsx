@@ -25,11 +25,11 @@ const Login = () => {
         },
         { withCredentials: true }
       );
-      dispatch(addUser(res.data.user));
+      dispatch(addUser(res.data.data));
       navigate("/");
     } catch (err) {
-      if (err.response && err.response.data && err.response.data) {
-        setError(err?.response?.data || "Login failed. Please try again.");
+      if (err.response?.data) {
+        setError(err.response.data.message || "Login failed. Please try again.");
         setEmail("");
         setPassword("");
       } else {
@@ -50,11 +50,11 @@ const Login = () => {
         },
         { withCredentials: true }
       );
-      dispatch(addUser(res.data.user));
+      dispatch(addUser(res.data.data));
       navigate("/profile");
     } catch (err) {
-      if (err.response && err.response.data) {
-        setError(err.response.data || "Sign Up failed. Please try again.");
+      if (err.response?.data) {
+        setError(err.response.data.message || "Sign up failed. Please try again.");
         setEmail("");
         setPassword("");
       } else {
