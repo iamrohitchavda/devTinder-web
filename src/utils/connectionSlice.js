@@ -4,7 +4,7 @@ const connectionSlice = createSlice({
   initialState: {
     data: [],
     loading: true,
-    error: null
+    error: null,
   },
   reducers: {
     setLoading: (state, action) => {
@@ -23,8 +23,8 @@ const connectionSlice = createSlice({
     setError: (state, action) => {
       state.error = action.payload;
       state.loading = false;
-    }
-  }
+    },
+  },
 });
 
 export const { addConnections, removeConnections, setLoading, setError } =

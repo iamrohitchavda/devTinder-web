@@ -1,9 +1,9 @@
 import { useParams, Link, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
-import { createSocketConnection } from "../utils/socket";
+import { createSocketConnection } from "../../utils/socket";
 import { useSelector } from "react-redux";
 import axios from "axios";
-import { API_BASE_URL } from "../utils/constants";
+import { API_BASE_URL } from "../../utils/constants";
 
 const Chat = () => {
   const { toUserId } = useParams();

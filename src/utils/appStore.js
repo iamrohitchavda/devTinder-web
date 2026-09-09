@@ -11,8 +11,8 @@ const appStore = configureStore({
     feed: feedReducer,
     connection: connectionReducer,
     request: requestReducer,
-    toast: toastReducer
-  }
+    toast: toastReducer,
+  },
 });
 
 //! wherever you subscribe to the store, make sure to in useSelector access state like state.user means the name of the reducer here is user not userReducer

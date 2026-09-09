@@ -5,7 +5,7 @@ const toastSlice = createSlice({
   initialState: {
     show: false,
     message: "",
-    type: "success" // 'success', 'error', 'info', 'warning'
+    type: "success", // 'success', 'error', 'info', 'warning'
   },
   reducers: {
     showToast: (state, action) => {
@@ -17,8 +17,8 @@ const toastSlice = createSlice({
       state.show = false;
       state.message = "";
       state.type = "success";
-    }
-  }
+    },
+  },
 });
 
 export const { showToast, hideToast } = toastSlice.actions;

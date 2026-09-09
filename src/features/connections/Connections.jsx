@@ -1,16 +1,22 @@
 import { useEffect } from "react";
-import { API_BASE_URL } from "../utils/constants";
+import { API_BASE_URL } from "../../utils/constants";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import { addConnections, setError, setLoading } from "../utils/connectionSlice";
+import {
+  addConnections,
+  setError,
+  setLoading,
+} from "../../utils/connectionSlice";
 import { Link } from "react-router-dom";
-import Loader from "./Loader";
+import Loader from "../../components/Loader";
 
 const Connections = () => {
   const dispatch = useDispatch();
-  const { data: connections, loading, error } = useSelector(
-    (state) => state.connection,
-  );
+  const {
+    data: connections,
+    loading,
+    error,
+  } = useSelector((state) => state.connection);
 
   useEffect(() => {
     const fetchConnections = async () => {
@@ -25,7 +31,11 @@ const Connections = () => {
         });
         dispatch(addConnections(res.data.data));
       } catch (error) {
-        dispatch(setError(error.response?.data?.message || "Unable to load connections"));
+        dispatch(
+          setError(
+            error.response?.data?.message || "Unable to load connections",
+          ),
+        );
       }
     };
 

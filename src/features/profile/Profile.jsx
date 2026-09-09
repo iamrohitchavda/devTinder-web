@@ -1,6 +1,6 @@
 import { useSelector } from "react-redux";
 import EditProfile from "./EditProfile";
-import Loader from "./Loader";
+import Loader from "../../components/Loader";
 
 const Profile = () => {
   const { data: user, loading } = useSelector((store) => store.user);

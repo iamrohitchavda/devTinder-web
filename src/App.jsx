@@ -1,15 +1,15 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Body from "./components/Body";
-import Login from "./components/Login";
-import Profile from "./components/Profile";
-import Feed from "./components/Feed";
+import Login from "./features/auth/Login";
+import Profile from "./features/profile/Profile";
+import Feed from "./features/feed/Feed";
 import { Provider } from "react-redux";
 import appStore from "./utils/appStore";
 import Error404 from "./components/Error404";
-import Connections from "./components/Connections";
-import Requests from "./components/Requests";
-import Premium from "./components/Premium";
-import Chat from "./components/Chat";
+import Connections from "./features/connections/Connections";
+import Requests from "./features/connections/Requests";
+import Premium from "./features/premium/Premium";
+import Chat from "./features/chat/Chat";
 
 function App() {
   return (

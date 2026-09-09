@@ -13,7 +13,7 @@ const Loader = () => {
             <div className="love"></div>
             <div className="love"></div>
             <div className="love"></div>
-          </div> 
+          </div>
         </div>
         <div className="loader-container">
           <div className="loader-carousel">
@@ -24,18 +24,18 @@ const Loader = () => {
             <div className="death"></div>
             <div className="death"></div>
             <div className="death"></div>
-          </div> 
+          </div>
         </div>
         <div className="loader-container">
           <div className="loader-carousel">
-              <div className="robots"></div>
-              <div className="robots"></div>
-              <div className="robots"></div>
-              <div className="robots"></div>
-              <div className="robots"></div>
-              <div className="robots"></div>
-              <div className="robots"></div>
-          </div> 
+            <div className="robots"></div>
+            <div className="robots"></div>
+            <div className="robots"></div>
+            <div className="robots"></div>
+            <div className="robots"></div>
+            <div className="robots"></div>
+            <div className="robots"></div>
+          </div>
         </div>
       </div>
     </div>

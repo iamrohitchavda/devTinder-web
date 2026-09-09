@@ -1,12 +1,21 @@
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import { API_BASE_URL } from "../utils/constants";
-import { addRequests, removeRequest, setError, setLoading } from "../utils/requestSlice";
+import { API_BASE_URL } from "../../utils/constants";
+import {
+  addRequests,
+  removeRequest,
+  setError,
+  setLoading,
+} from "../../utils/requestSlice";
 import { useEffect } from "react";
-import { showToast } from "../utils/toastSlice";
+import { showToast } from "../../utils/toastSlice";
 
 const Requests = () => {
-  const { data: request, loading, error } = useSelector((state) => state.request);
+  const {
+    data: request,
+    loading,
+    error,
+  } = useSelector((state) => state.request);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -23,7 +32,9 @@ const Requests = () => {
         });
         dispatch(addRequests(res.data.data));
       } catch (error) {
-        dispatch(setError(error.response?.data?.message || "Unable to load requests"));
+        dispatch(
+          setError(error.response?.data?.message || "Unable to load requests"),
+        );
       }
     };
 
@@ -59,7 +70,7 @@ const Requests = () => {
       await axios.post(
         API_BASE_URL + `/request/review/${status}/${requestId}`,
         {},
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       dispatch(removeRequest(requestId));
@@ -69,8 +80,8 @@ const Requests = () => {
             status === "accepted"
               ? "Request accepted successfully!"
               : "Request rejected.",
-          type: status === "accepted" ? "success" : "error"
-        })
+          type: status === "accepted" ? "success" : "error",
+        }),
       );
     } catch (error) {
       dispatch(

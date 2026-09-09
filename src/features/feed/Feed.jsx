@@ -1,10 +1,10 @@
 import axios from "axios";
-import { addFeed, setError, setLoading } from "../utils/feedSlice";
+import { addFeed, setError, setLoading } from "../../utils/feedSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
-import { API_BASE_URL } from "../utils/constants";
-import UserCard from "./UserCard";
-import Loader from "./Loader";
+import { API_BASE_URL } from "../../utils/constants";
+import UserCard from "../../components/UserCard";
+import Loader from "../../components/Loader";
 
 const Feed = () => {
   const { data: feed, loading, error } = useSelector((state) => state.feed);
@@ -23,7 +23,9 @@ const Feed = () => {
         });
         dispatch(addFeed(response.data.data));
       } catch (error) {
-        dispatch(setError(error.response?.data?.message || "Unable to load the feed"));
+        dispatch(
+          setError(error.response?.data?.message || "Unable to load the feed"),
+        );
       }
     };
 

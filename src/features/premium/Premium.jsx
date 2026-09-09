@@ -29,7 +29,8 @@ const Premium = () => {
             Premium plans coming soon
           </span>
           <p className="mt-4 text-xl text-base-content/70 max-w-2xl mx-auto">
-            Preview the planned membership benefits. Payments are not available yet.
+            Preview the planned membership benefits. Payments are not available
+            yet.
           </p>
         </div>
 
@@ -137,7 +138,10 @@ const Premium = () => {
                 </li>
               </ul>
               <div className="card-actions justify-center mt-auto pt-6">
-                <button disabled className="btn w-full rounded-full border-none bg-linear-to-r from-yellow-400 to-orange-500 text-white shadow-md opacity-60">
+                <button
+                  disabled
+                  className="btn w-full rounded-full border-none bg-linear-to-r from-yellow-400 to-orange-500 text-white shadow-md opacity-60"
+                >
                   Coming Soon
                 </button>
               </div>
@@ -187,7 +191,10 @@ const Premium = () => {
                 </li>
               </ul>
               <div className="card-actions justify-center mt-auto pt-6">
-                <button disabled className="btn btn-outline w-full rounded-full opacity-60">
+                <button
+                  disabled
+                  className="btn btn-outline w-full rounded-full opacity-60"
+                >
                   Coming Soon
                 </button>
               </div>

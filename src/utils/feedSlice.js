@@ -5,7 +5,7 @@ const feedSlice = createSlice({
   initialState: {
     data: [],
     loading: true,
-    error: null
+    error: null,
   },
   reducers: {
     addFeed: (state, action) => {
@@ -15,7 +15,7 @@ const feedSlice = createSlice({
     },
     removeFeed: (state, action) => {
       state.data = state.data.filter(
-        (request) => request._id !== action.payload
+        (request) => request._id !== action.payload,
       );
       state.loading = false;
       state.error = null;
@@ -26,8 +26,8 @@ const feedSlice = createSlice({
     setError: (state, action) => {
       state.error = action.payload;
       state.loading = false;
-    }
-  }
+    },
+  },
 });
 
 export const { addFeed, removeFeed, setLoading, setError } = feedSlice.actions;

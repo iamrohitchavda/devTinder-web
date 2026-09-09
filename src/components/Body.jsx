@@ -29,7 +29,8 @@ const Body = () => {
         });
         dispatch(addUser(res.data.data));
       } catch (error) {
-        const message = error.response?.data?.message || "Unable to load your session";
+        const message =
+          error.response?.data?.message || "Unable to load your session";
         dispatch(setError(message));
         if (error.response?.status === 401) navigate("/login");
       }

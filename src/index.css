@@ -8,18 +8,34 @@
   --animate-swipe-right: swipe-right 0.4s ease-in forwards;
 
   @keyframes fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
   @keyframes slide-up {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
   @keyframes swipe-left {
-    to { transform: translateX(-200%) rotate(-20deg); opacity: 0; }
+    to {
+      transform: translateX(-200%) rotate(-20deg);
+      opacity: 0;
+    }
   }
   @keyframes swipe-right {
-    to { transform: translateX(200%) rotate(20deg); opacity: 0; }
+    to {
+      transform: translateX(200%) rotate(20deg);
+      opacity: 0;
+    }
   }
 }
 
@@ -31,5 +47,9 @@
   @apply bg-base-100 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-base-200/50 overflow-hidden;
 }
 
-.anim-delay-100 { animation-delay: 100ms; }
-.anim-delay-200 { animation-delay: 200ms; }
+.anim-delay-100 {
+  animation-delay: 100ms;
+}
+.anim-delay-200 {
+  animation-delay: 200ms;
+}
