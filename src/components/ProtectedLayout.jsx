@@ -58,7 +58,7 @@ const ProtectedLayout = () => {
   return (
     <div className="flex flex-col min-h-screen bg-base-200/30">
       <Navbar />
-      <main className="grow flex flex-col pt-4">
+      <main className="grow flex flex-col pt-4 pb-6">
         <Outlet />
       </main>
       <Footer />

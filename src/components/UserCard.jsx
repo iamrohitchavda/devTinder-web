@@ -4,10 +4,11 @@ import { removeFeed } from "../utils/feedSlice";
 import { API_BASE_URL } from "../utils/constants";
 import { useState } from "react";
 
-const UserCard = ({ user }) => {
+const UserCard = ({ user, compact = false, showActions = true }) => {
   const { _id, firstName, lastName, photoUrl, age, gender, bio } = user || {};
   const dispatch = useDispatch();
   const [animationClass, setAnimationClass] = useState("animate-slide-up");
+  const imageHeight = compact ? "h-64 sm:h-72" : "h-[360px] sm:h-[420px]";
 
   const handleSendRequest = async (status, userId) => {
     // trigger swipe animation
@@ -39,7 +40,9 @@ const UserCard = ({ user }) => {
     <div
       className={`modern-card w-full max-w-sm mx-auto sm:w-96 group relative ${animationClass}`}
     >
-      <figure className="relative h-[450px] sm:h-[500px] w-full overflow-hidden bg-base-300">
+      <figure
+        className={`relative ${imageHeight} w-full overflow-hidden bg-base-300`}
+      >
         <img
           src={
             photoUrl ||
@@ -66,7 +69,9 @@ const UserCard = ({ user }) => {
         </div>
       </figure>
 
-      <div className="p-6 bg-base-100 flex flex-col gap-4 relative z-10 border-t border-base-200/50">
+      <div
+        className={`${compact ? "p-4 gap-3" : "p-6 gap-4"} bg-base-100 flex flex-col relative z-10 border-t border-base-200/50`}
+      >
         {bio ? (
           <p className="text-base-content/80 text-sm sm:text-base leading-relaxed overflow-y-auto max-h-24 pr-2">
             {bio}
@@ -77,47 +82,49 @@ const UserCard = ({ user }) => {
           </p>
         )}
 
-        <div className="flex justify-center gap-8 mt-4 pt-4 border-t border-base-200">
-          <button
-            className="btn btn-circle w-16 h-16 bg-base-100 border-2 border-error text-error hover:bg-error hover:text-white hover:scale-110 hover:border-error shadow-xl transition-all duration-300 ease-spring"
-            onClick={() => handleSendRequest("ignored", _id)}
-            aria-label="Ignore"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-8 w-8"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+        {showActions && (
+          <div className="flex justify-center gap-8 mt-4 pt-4 border-t border-base-200">
+            <button
+              className="btn btn-circle w-16 h-16 bg-base-100 border-2 border-error text-error hover:bg-error hover:text-white hover:scale-110 hover:border-error shadow-xl transition-all duration-300 ease-spring"
+              onClick={() => handleSendRequest("ignored", _id)}
+              aria-label="Ignore"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2.5"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-8 w-8"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2.5"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
 
-          <button
-            className="btn btn-circle w-16 h-16 bg-base-100 border-2 border-success text-success hover:bg-success hover:text-white hover:scale-110 hover:border-success shadow-xl transition-all duration-300 ease-spring"
-            onClick={() => handleSendRequest("interested", _id)}
-            aria-label="Interested"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-8 w-8"
-              viewBox="0 0 20 20"
-              fill="currentColor"
+            <button
+              className="btn btn-circle w-16 h-16 bg-base-100 border-2 border-success text-success hover:bg-success hover:text-white hover:scale-110 hover:border-success shadow-xl transition-all duration-300 ease-spring"
+              onClick={() => handleSendRequest("interested", _id)}
+              aria-label="Interested"
             >
-              <path
-                fillRule="evenodd"
-                d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </button>
-        </div>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-8 w-8"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   ) : (

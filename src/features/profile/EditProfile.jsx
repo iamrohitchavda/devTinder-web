@@ -109,6 +109,8 @@ const EditProfile = ({ user }) => {
           </div>
           <div className="w-full max-w-[380px] pointer-events-none scale-100 xl:scale-105 origin-top transition-all">
             <UserCard
+              compact
+              showActions={false}
               user={{
                 firstName: firstName || "First",
                 lastName: lastName || "Last",
