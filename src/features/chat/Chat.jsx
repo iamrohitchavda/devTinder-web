@@ -5,6 +5,8 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import { API_BASE_URL, DEFAULT_PROFILE_PHOTO } from "../../utils/constants";
 
+const QUICK_EMOJIS = ["👍", "❤️", "😂", "🎉", "🚀", "🔥", "👏", "👀"];
+
 const Chat = () => {
   const { toUserId } = useParams();
   const location = useLocation();
@@ -16,7 +18,11 @@ const Chat = () => {
   const [error, setError] = useState(null);
   const chatContainerRef = useRef(null);
   const photoInputRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
   const [isUserActive, setIsUserActive] = useState(false);
+  const [isPartnerTyping, setIsPartnerTyping] = useState(false);
+  const [isGifComposerOpen, setIsGifComposerOpen] = useState(false);
+  const [gifUrl, setGifUrl] = useState("");
 
   const fromUserId = user?.data?._id;
   const receiverName = partner
@@ -55,6 +61,8 @@ const Chat = () => {
               : "Unknown",
             text: msg.text,
             imageData: msg.imageData,
+            mediaUrl: msg.mediaUrl,
+            readAt: msg.readAt,
             createdAt: msg.createdAt,
           };
         });
@@ -77,6 +85,7 @@ const Chat = () => {
         _id,
         text,
         imageData,
+        mediaUrl,
         senderId,
         receiverId,
         createdAt,
@@ -84,7 +93,16 @@ const Chat = () => {
       }) => {
         setMessages((prevMessages) => [
           ...prevMessages,
-          { _id, text, imageData, senderId, receiverId, createdAt, senderName },
+          {
+            _id,
+            text,
+            imageData,
+            mediaUrl,
+            senderId,
+            receiverId,
+            createdAt,
+            senderName,
+          },
         ]);
       },
     );
@@ -92,6 +110,22 @@ const Chat = () => {
     socket.on("messageUnsent", ({ messageId }) => {
       setMessages((prevMessages) =>
         prevMessages.filter((message) => message._id !== messageId),
+      );
+    });
+
+    socket.on("typingStarted", ({ senderId }) => {
+      if (senderId === toUserId) setIsPartnerTyping(true);
+    });
+
+    socket.on("typingStopped", ({ senderId }) => {
+      if (senderId === toUserId) setIsPartnerTyping(false);
+    });
+
+    socket.on("messagesRead", ({ messageIds, readAt }) => {
+      setMessages((prevMessages) =>
+        prevMessages.map((message) =>
+          messageIds.includes(message._id) ? { ...message, readAt } : message,
+        ),
       );
     });
 
@@ -109,13 +143,30 @@ const Chat = () => {
     // When the component unmounts or user navigates away, cleanly remove the listeners
     // instead of destroying the entire physical TCP connection.
     return () => {
+      clearTimeout(typingTimeoutRef.current);
+      socket.emit("typingStop", { receiverId: toUserId });
       console.log("leaving chat component. cleaning listeners...");
       socket.off("messageReceived");
       socket.off("messageUnsent");
+      socket.off("typingStarted");
+      socket.off("typingStopped");
+      socket.off("messagesRead");
       socket.off("status-changed");
       socket.off("chat-error");
     };
   }, [fromUserId, toUserId]);
+
+  useEffect(() => {
+    const hasUnreadMessages = messages.some(
+      (message) => message.senderId === toUserId && !message.readAt,
+    );
+
+    if (hasUnreadMessages) {
+      createSocketConnection().emit("markMessagesRead", {
+        receiverId: toUserId,
+      });
+    }
+  }, [messages, toUserId]);
 
   useEffect(() => {
     chatContainerRef.current?.scrollTo({
@@ -135,7 +186,41 @@ const Chat = () => {
       receiverId: toUserId,
     });
 
+    socket.emit("typingStop", { receiverId: toUserId });
     setNewMessage("");
+  };
+
+  const handleMessageChange = (value) => {
+    setNewMessage(value);
+    const socket = createSocketConnection();
+
+    if (!value.trim()) {
+      socket.emit("typingStop", { receiverId: toUserId });
+      clearTimeout(typingTimeoutRef.current);
+      return;
+    }
+
+    socket.emit("typingStart", { receiverId: toUserId });
+    clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => {
+      socket.emit("typingStop", { receiverId: toUserId });
+    }, 1200);
+  };
+
+  const handleEmojiSelect = (emoji) => {
+    handleMessageChange(`${newMessage}${emoji}`);
+  };
+
+  const handleSendGif = (event) => {
+    event.preventDefault();
+    if (!gifUrl.trim()) return;
+
+    createSocketConnection().emit("sendMessage", {
+      mediaUrl: gifUrl.trim(),
+      receiverId: toUserId,
+    });
+    setGifUrl("");
+    setIsGifComposerOpen(false);
   };
 
   const handlePhotoSelection = (event) => {
@@ -236,7 +321,11 @@ const Chat = () => {
                 {receiverName}
               </h2>
               <span className="text-xs font-semibold text-success tracking-wide">
-                {isUserActive ? "Active now" : "Offline"}
+                {isPartnerTyping
+                  ? "typing..."
+                  : isUserActive
+                    ? "Active now"
+                    : "Offline"}
               </span>
             </div>
           </div>
@@ -334,9 +423,9 @@ const Chat = () => {
                     : "bg-base-100 text-base-content border border-base-200"
                 }`}
               >
-                {msg.imageData && (
+                {(msg.imageData || msg.mediaUrl) && (
                   <img
-                    src={msg.imageData}
+                    src={msg.imageData || msg.mediaUrl}
                     alt="Shared in chat"
                     className="mb-2 max-h-72 max-w-full rounded-xl object-cover"
                   />
@@ -345,7 +434,7 @@ const Chat = () => {
               </div>
               {msg.senderId === fromUserId && (
                 <div className="chat-footer mt-1 flex items-center justify-end gap-2 text-xs opacity-60">
-                  <span>Delivered</span>
+                  <span>{msg.readAt ? "Seen" : "Delivered"}</span>
                   <button
                     type="button"
                     onClick={() => handleUnsendMessage(msg._id)}
@@ -360,7 +449,25 @@ const Chat = () => {
         </div>
 
         {/* Message Input Compositor */}
-        <div className="bg-base-100 p-4 border-t border-base-200 shadow-[0_-4px_6px_-1px_rgb(0,0,0,0.05)] shrink-0 z-10 flex items-center justify-center min-h-[76px]">
+        <div className="relative bg-base-100 p-4 border-t border-base-200 shadow-[0_-4px_6px_-1px_rgb(0,0,0,0.05)] shrink-0 z-10 flex items-center justify-center min-h-[76px]">
+          {isGifComposerOpen && (
+            <form
+              onSubmit={handleSendGif}
+              className="absolute bottom-full left-4 right-4 mb-2 flex gap-2 rounded-2xl border border-base-300 bg-base-100 p-3 shadow-xl"
+            >
+              <input
+                type="url"
+                autoFocus
+                value={gifUrl}
+                onChange={(event) => setGifUrl(event.target.value)}
+                placeholder="Paste a GIF URL..."
+                className="input input-sm input-bordered grow"
+              />
+              <button type="submit" className="btn btn-sm btn-primary">
+                Send GIF
+              </button>
+            </form>
+          )}
           <form
             onSubmit={handleSendMessage}
             className="flex items-center gap-2 max-w-full w-full"
@@ -393,12 +500,44 @@ const Chat = () => {
                 />
               </svg>
             </button>
+            <div className="dropdown dropdown-top">
+              <button
+                type="button"
+                tabIndex={0}
+                aria-label="Choose an emoji"
+                className="btn btn-circle btn-ghost text-base-content/50 hover:text-primary"
+              >
+                ☺
+              </button>
+              <div
+                tabIndex={0}
+                className="dropdown-content z-20 mb-3 grid w-56 grid-cols-4 gap-1 rounded-2xl border border-base-300 bg-base-100 p-2 shadow-xl"
+              >
+                {QUICK_EMOJIS.map((emoji) => (
+                  <button
+                    type="button"
+                    key={emoji}
+                    onClick={() => handleEmojiSelect(emoji)}
+                    className="btn btn-ghost btn-sm text-lg"
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsGifComposerOpen((isOpen) => !isOpen)}
+              className="btn btn-ghost btn-sm px-2 text-xs font-bold text-base-content/60 hover:text-primary"
+            >
+              GIF
+            </button>
             <input
               type="text"
               placeholder="Type your message..."
               className="input input-bordered w-full rounded-full bg-base-200/50 focus:bg-base-100 focus:border-primary transition-all shadow-inner"
               value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
+              onChange={(event) => handleMessageChange(event.target.value)}
             />
             <button
               type="submit"
