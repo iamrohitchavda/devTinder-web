@@ -48,7 +48,7 @@ const Chat = () => {
               ? `${msg.senderId.firstName} ${msg.senderId.lastName}`
               : "Unknown",
             text: msg.text,
-            time: msg.time,
+            createdAt: msg.createdAt,
           };
         });
         setMessages(chatMessages);
@@ -66,10 +66,10 @@ const Chat = () => {
 
     socket.on(
       "messageReceived",
-      ({ text, senderId, receiverId, time, senderName }) => {
+      ({ _id, text, senderId, receiverId, createdAt, senderName }) => {
         setMessages((prevMessages) => [
           ...prevMessages,
-          { text, senderId, receiverId, time, senderName },
+          { _id, text, senderId, receiverId, createdAt, senderName },
         ]);
       },
     );
@@ -110,10 +110,6 @@ const Chat = () => {
 
     socket.emit("sendMessage", {
       text: newMessage,
-      time: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
       receiverId: toUserId,
     });
 
@@ -244,7 +240,14 @@ const Chat = () => {
                   : msg.senderName
                     ? msg.senderName
                     : "Unknown"}
-                <time className="text-xs opacity-50 ml-2">{msg.time}</time>
+                <time className="text-xs opacity-50 ml-2">
+                  {msg.createdAt
+                    ? new Date(msg.createdAt).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })
+                    : ""}
+                </time>
               </div>
               <div
                 className={`chat-bubble shadow-sm ${
