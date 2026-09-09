@@ -11,12 +11,11 @@ const Chat = () => {
   const [partner, setPartner] = useState(location.state?.receiver || null);
 
   const user = useSelector((store) => store.user);
-  // Simulated initial chat state.
-  // In reality, you will fetch these from your backend via Socket.io / API.
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [error, setError] = useState(null);
   const chatContainerRef = useRef(null);
+  const photoInputRef = useRef(null);
   const [isUserActive, setIsUserActive] = useState(false);
 
   const fromUserId = user?.data?._id;
@@ -49,11 +48,13 @@ const Chat = () => {
       if (chat?.data?.data?.messages) {
         const chatMessages = chat.data.data.messages.map((msg) => {
           return {
+            _id: msg._id,
             senderId: msg.senderId?._id || msg.senderId,
             senderName: msg.senderId?.firstName
               ? `${msg.senderId.firstName} ${msg.senderId.lastName}`
               : "Unknown",
             text: msg.text,
+            imageData: msg.imageData,
             createdAt: msg.createdAt,
           };
         });
@@ -72,13 +73,27 @@ const Chat = () => {
 
     socket.on(
       "messageReceived",
-      ({ _id, text, senderId, receiverId, createdAt, senderName }) => {
+      ({
+        _id,
+        text,
+        imageData,
+        senderId,
+        receiverId,
+        createdAt,
+        senderName,
+      }) => {
         setMessages((prevMessages) => [
           ...prevMessages,
-          { _id, text, senderId, receiverId, createdAt, senderName },
+          { _id, text, imageData, senderId, receiverId, createdAt, senderName },
         ]);
       },
     );
+
+    socket.on("messageUnsent", ({ messageId }) => {
+      setMessages((prevMessages) =>
+        prevMessages.filter((message) => message._id !== messageId),
+      );
+    });
 
     // Listen for other users' status changes
     socket.on("status-changed", ({ userOnlineList }) => {
@@ -96,6 +111,7 @@ const Chat = () => {
     return () => {
       console.log("leaving chat component. cleaning listeners...");
       socket.off("messageReceived");
+      socket.off("messageUnsent");
       socket.off("status-changed");
       socket.off("chat-error");
     };
@@ -120,6 +136,62 @@ const Chat = () => {
     });
 
     setNewMessage("");
+  };
+
+  const handlePhotoSelection = (event) => {
+    const [file] = event.target.files;
+    event.target.value = "";
+
+    if (!file) return;
+    if (!file.type.startsWith("image/") || file.size > 1500000) {
+      setError("Choose an image smaller than 1.5 MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      createSocketConnection().emit("sendMessage", {
+        imageData: reader.result,
+        receiverId: toUserId,
+      });
+      setError(null);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleClearChat = async () => {
+    if (
+      !window.confirm(
+        "Delete this conversation for you? The other person will still have it.",
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await axios.delete(`${API_BASE_URL}/chat/${toUserId}`, {
+        withCredentials: true,
+      });
+      setMessages([]);
+    } catch (err) {
+      setError(err.response?.data?.message || "Unable to delete this chat.");
+    }
+  };
+
+  const handleUnsendMessage = async (messageId) => {
+    try {
+      await axios.delete(
+        `${API_BASE_URL}/chat/${toUserId}/messages/${messageId}`,
+        {
+          withCredentials: true,
+        },
+      );
+      setMessages((prevMessages) =>
+        prevMessages.filter((message) => message._id !== messageId),
+      );
+    } catch (err) {
+      setError(err.response?.data?.message || "Unable to unsend this message.");
+    }
   };
 
   return (
@@ -169,24 +241,13 @@ const Chat = () => {
             </div>
           </div>
 
-          <div className="flex gap-2">
-            <button className="btn btn-ghost btn-circle text-base-content/70 hover:text-primary">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                />
-              </svg>
-            </button>
-            <button className="btn btn-ghost btn-circle text-base-content/70 hover:text-primary">
+          <div className="dropdown dropdown-end">
+            <button
+              type="button"
+              tabIndex={0}
+              aria-label="Chat options"
+              className="btn btn-ghost btn-circle text-base-content/70 hover:text-primary"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5"
@@ -202,6 +263,20 @@ const Chat = () => {
                 />
               </svg>
             </button>
+            <ul
+              tabIndex={0}
+              className="dropdown-content menu z-20 mt-3 w-56 rounded-box border border-base-300 bg-base-100 p-2 shadow-xl"
+            >
+              <li>
+                <button
+                  type="button"
+                  onClick={handleClearChat}
+                  className="text-error"
+                >
+                  Delete chat for me
+                </button>
+              </li>
+            </ul>
           </div>
         </div>
 
@@ -216,9 +291,9 @@ const Chat = () => {
             </span>
           </div>
 
-          {messages.map((msg, idx) => (
+          {messages.map((msg) => (
             <div
-              key={idx}
+              key={msg._id}
               className={`chat ${msg.senderId === fromUserId ? "chat-end" : "chat-start"} animate-slide-up`}
             >
               <div className="chat-image avatar hidden sm:block">
@@ -259,11 +334,25 @@ const Chat = () => {
                     : "bg-base-100 text-base-content border border-base-200"
                 }`}
               >
+                {msg.imageData && (
+                  <img
+                    src={msg.imageData}
+                    alt="Shared in chat"
+                    className="mb-2 max-h-72 max-w-full rounded-xl object-cover"
+                  />
+                )}
                 {msg.text}
               </div>
               {msg.senderId === fromUserId && (
-                <div className="chat-footer opacity-50 text-xs mt-1">
-                  Delivered
+                <div className="chat-footer mt-1 flex items-center justify-end gap-2 text-xs opacity-60">
+                  <span>Delivered</span>
+                  <button
+                    type="button"
+                    onClick={() => handleUnsendMessage(msg._id)}
+                    className="hover:text-error"
+                  >
+                    Unsend
+                  </button>
                 </div>
               )}
             </div>
@@ -272,56 +361,62 @@ const Chat = () => {
 
         {/* Message Input Compositor */}
         <div className="bg-base-100 p-4 border-t border-base-200 shadow-[0_-4px_6px_-1px_rgb(0,0,0,0.05)] shrink-0 z-10 flex items-center justify-center min-h-[76px]">
-          {error ? (
-            <div className="text-center py-2 text-base-content/50 font-medium tracking-wide">
-              {error}
-            </div>
-          ) : (
-            <form
-              onSubmit={handleSendMessage}
-              className="flex items-center gap-2 max-w-full w-full"
+          <form
+            onSubmit={handleSendMessage}
+            className="flex items-center gap-2 max-w-full w-full"
+          >
+            <input
+              ref={photoInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              className="hidden"
+              onChange={handlePhotoSelection}
+            />
+            <button
+              type="button"
+              aria-label="Send a photo"
+              onClick={() => photoInputRef.current?.click()}
+              className="btn btn-circle btn-ghost text-base-content/50 hover:text-primary transition-colors shrink-0"
             >
-              <button
-                type="button"
-                className="btn btn-circle btn-ghost text-base-content/50 hover:text-primary transition-colors shrink-0"
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
-                  />
-                </svg>
-              </button>
-              <input
-                type="text"
-                placeholder="Type your message..."
-                className="input input-bordered w-full rounded-full bg-base-200/50 focus:bg-base-100 focus:border-primary transition-all shadow-inner"
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-              />
-              <button
-                type="submit"
-                className="btn btn-circle btn-primary shadow-lg shadow-primary/30 hover:scale-105 transition-transform shrink-0"
-                disabled={!newMessage.trim()}
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                />
+              </svg>
+            </button>
+            <input
+              type="text"
+              placeholder="Type your message..."
+              className="input input-bordered w-full rounded-full bg-base-200/50 focus:bg-base-100 focus:border-primary transition-all shadow-inner"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+            />
+            <button
+              type="submit"
+              className="btn btn-circle btn-primary shadow-lg shadow-primary/30 hover:scale-105 transition-transform shrink-0"
+              disabled={!newMessage.trim()}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 rotate-90"
+                viewBox="0 0 20 20"
+                fill="currentColor"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 rotate-90"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-                </svg>
-              </button>
-            </form>
+                <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+              </svg>
+            </button>
+          </form>
+          {error && (
+            <p className="absolute -top-7 text-xs text-error">{error}</p>
           )}
         </div>
       </div>
