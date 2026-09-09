@@ -3,12 +3,12 @@ import { useEffect, useRef, useState } from "react";
 import { createSocketConnection } from "../../utils/socket";
 import { useSelector } from "react-redux";
 import axios from "axios";
-import { API_BASE_URL } from "../../utils/constants";
+import { API_BASE_URL, DEFAULT_PROFILE_PHOTO } from "../../utils/constants";
 
 const Chat = () => {
   const { toUserId } = useParams();
   const location = useLocation();
-  const receiverName = location.state?.receiverName || "Unknown";
+  const [partner, setPartner] = useState(location.state?.receiver || null);
 
   const user = useSelector((store) => store.user);
   // Simulated initial chat state.
@@ -20,6 +20,11 @@ const Chat = () => {
   const [isUserActive, setIsUserActive] = useState(false);
 
   const fromUserId = user?.data?._id;
+  const receiverName = partner
+    ? `${partner.firstName} ${partner.lastName || ""}`.trim()
+    : location.state?.receiverName || "Unknown";
+  const receiverPhoto = partner?.photoUrl || DEFAULT_PROFILE_PHOTO;
+  const currentUserPhoto = user?.data?.photoUrl || DEFAULT_PROFILE_PHOTO;
 
   useEffect(() => {
     const fetchChatMessages = async () => {
@@ -28,6 +33,7 @@ const Chat = () => {
         chat = await axios.get(`${API_BASE_URL}/chat/${toUserId}`, {
           withCredentials: true,
         });
+        setPartner(chat.data.data.partner);
         setError(null);
       } catch (err) {
         if (err.response?.status === 500) {
@@ -147,8 +153,8 @@ const Chat = () => {
               ></span>
               <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-base-200 bg-base-300">
                 <img
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80"
-                  alt="Connection Avatar"
+                  src={receiverPhoto}
+                  alt={receiverName}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -215,25 +221,22 @@ const Chat = () => {
               key={idx}
               className={`chat ${msg.senderId === fromUserId ? "chat-end" : "chat-start"} animate-slide-up`}
             >
-              {msg.senderId !== fromUserId ? (
-                <div className="chat-image avatar hidden sm:block">
-                  <div className="w-10 rounded-full">
-                    <img
-                      src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80"
-                      alt="Avatar"
-                    />
-                  </div>
+              <div className="chat-image avatar hidden sm:block">
+                <div className="w-10 rounded-full">
+                  <img
+                    src={
+                      msg.senderId === fromUserId
+                        ? currentUserPhoto
+                        : receiverPhoto
+                    }
+                    alt={
+                      msg.senderId === fromUserId
+                        ? "Your profile"
+                        : receiverName
+                    }
+                  />
                 </div>
-              ) : (
-                <div className="chat-image avatar hidden sm:block">
-                  <div className="w-10 rounded-full">
-                    <img
-                      src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80"
-                      alt="Avatar"
-                    />
-                  </div>
-                </div>
-              )}
+              </div>
               <div className="chat-header mb-1 text-xs opacity-60">
                 {msg.senderId === fromUserId
                   ? "You"

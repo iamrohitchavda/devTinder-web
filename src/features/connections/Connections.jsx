@@ -159,7 +159,7 @@ const Connections = () => {
 
               <Link
                 to={`/chat/${connection._id}`}
-                state={{ receiverName: `${firstName} ${lastName}` }}
+                state={{ receiver: connection }}
               >
                 <button className="btn btn-outline btn-sm w-full mt-4 rounded-full hover:bg-primary hover:text-white hover:border-primary transition-colors">
                   Send Message

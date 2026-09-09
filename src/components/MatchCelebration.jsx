@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { DEFAULT_PROFILE_PHOTO } from "../utils/constants";
 
 const codeParticles = ["</>", "{ }", "git", "npm", "=>", "&&"];
 
@@ -50,7 +51,10 @@ const MatchCelebration = ({ match, onClose }) => {
         <div className="my-8 flex items-center justify-center gap-4">
           <div className="avatar">
             <div className="w-20 rounded-full ring-4 ring-primary/30 ring-offset-4 ring-offset-base-100">
-              <img src={matchedUser.photoUrl} alt={matchedUser.firstName} />
+              <img
+                src={matchedUser.photoUrl || DEFAULT_PROFILE_PHOTO}
+                alt={matchedUser.firstName}
+              />
             </div>
           </div>
           <div className="flex items-center gap-1 text-primary">
