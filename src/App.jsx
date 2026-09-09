@@ -13,7 +13,7 @@ import Chat from "./features/chat/Chat";
 
 function App() {
   return (
-    <>
+    <div className="app-root" data-theme="night">
       <Provider store={appStore}>
         <BrowserRouter basename="/">
           <Routes>
@@ -32,7 +32,7 @@ function App() {
           </Routes>
         </BrowserRouter>
       </Provider>
-    </>
+    </div>
   );
 }
 

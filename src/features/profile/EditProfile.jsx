@@ -93,10 +93,9 @@ const EditProfile = ({ user }) => {
   return (
     <div className="container mx-auto px-4 py-8 animate-fade-in mb-10 w-full overflow-hidden">
       <div className="text-center mb-10 animate-slide-up">
-        <h1 className="text-4xl font-extrabold text-base-content tracking-tight mb-2">
-          Your Profile
-        </h1>
-        <p className="text-base-content/60 text-lg">
+        <p className="page-kicker">YOUR SIGNAL</p>
+        <h1 className="page-heading mb-2">Your Profile</h1>
+        <p className="page-subheading text-lg">
           Update how you appear to other developers on DevTinder.
         </p>
       </div>

@@ -47,6 +47,11 @@ const Feed = () => {
   return (
     feed && (
       <div className="flex flex-col items-center justify-center w-full px-4 my-6 sm:my-10">
+        <div className="feed-intro">
+          <span>DISCOVER</span>
+          <h1>Find the person your next idea needs.</h1>
+          <p>One thoughtful introduction at a time.</p>
+        </div>
         <UserCard user={feed[0]} />
       </div>
     )

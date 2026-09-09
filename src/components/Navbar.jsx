@@ -36,9 +36,9 @@ export const Navbar = () => {
       <div className="flex-1">
         <Link
           to={user ? "/" : "/login"}
-          className="btn btn-ghost text-2xl font-extrabold tracking-tight hover:scale-105 transition-transform text-primary"
+          className="btn btn-ghost text-xl font-extrabold tracking-[-0.06em] hover:scale-[1.02] transition-transform text-base-content"
         >
-          DevTinder
+          DevTinder<span className="text-primary">·</span>
         </Link>
       </div>
       {user && (
@@ -79,7 +79,6 @@ export const Navbar = () => {
                   className="justify-between hover:bg-base-200 rounded-lg py-2 transition-colors"
                 >
                   Profile
-                  <span className="badge badge-primary badge-sm">New</span>
                 </Link>
               </li>
               <li>
